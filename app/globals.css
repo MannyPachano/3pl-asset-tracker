@@ -39,12 +39,12 @@ textarea::placeholder {
 /* Table cells: dark text for readability (override any light inherited color) */
 table th,
 table td {
-  color: #111827;
+  color: #111827 !important;
 }
 
 /* Buttons and links: pointer cursor */
 a,
 button {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
