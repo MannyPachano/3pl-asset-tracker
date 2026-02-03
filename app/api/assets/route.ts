@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     labelId?: { contains: string; mode: "insensitive" };
     assetTypeId?: number;
     status?: string;
-    clientId?: number | null;
+    clientId?: number | null | { not: null };
     warehouseId?: number | null;
     zoneId?: number | null;
   } = {
