@@ -51,10 +51,17 @@
 
   .app-layout table th,
   .app-layout table td {
+    background-color: var(--surface);
     border-color: var(--border);
+    color: var(--foreground);
   }
 
-  .app-layout table thead tr {
+  .app-layout table thead tr,
+  .app-layout table tr.bg-gray-100 {
+    background-color: var(--surface) !important;
+  }
+
+  .app-layout table tbody tr {
     background-color: var(--surface);
   }
 
