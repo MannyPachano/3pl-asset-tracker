@@ -117,7 +117,7 @@ export default function WarehousesPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 rounded border border-gray-300 px-2 py-1"
+                className="mt-1 w-full min-w-0 rounded border border-gray-300 px-2 py-1 text-gray-900"
                 required
               />
             </div>
@@ -127,7 +127,7 @@ export default function WarehousesPage() {
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="mt-1 rounded border border-gray-300 px-2 py-1"
+                className="mt-1 w-full min-w-0 rounded border border-gray-300 px-2 py-1 text-gray-900"
               />
             </div>
             <div className="flex gap-2">
@@ -141,7 +141,7 @@ export default function WarehousesPage() {
               <button
                 type="button"
                 onClick={cancelForm}
-                className="rounded border border-gray-300 px-3 py-1 text-sm"
+                className="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:bg-gray-50"
               >
                 Cancel
               </button>

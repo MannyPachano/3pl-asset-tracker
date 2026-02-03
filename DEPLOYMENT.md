@@ -93,3 +93,25 @@ Or use **Neon/Supabase SQL editor** and run the SQL from `prisma/migrations/2025
 - Use **HTTPS** (Vercel/Railway/Render provide it).
 - Use a **strong, unique `JWT_SECRET`** in production (e.g. `openssl rand -base64 32`).
 - Change the **seed admin password** after first login, or avoid running seed in production and create the first user via another channel.
+
+---
+
+## "Application failed to respond" (Railway / similar)
+
+If the deploy builds but the app shows this error:
+
+1. **Check Deploy Logs** in Railway (not just build logs). Look for runtime errors (e.g. missing env, Prisma connection, uncaught exception).
+
+2. **Variables** – In the service **Variables** tab, ensure:
+   - **`DATABASE_URL`** – Set (e.g. from the Postgres plugin “Connect” / “Variable reference”). Must be the **external** or **private** URL Railway gives you.
+   - **`JWT_SECRET`** – Set and at least **32 characters** (e.g. run `openssl rand -base64 32` locally and paste).
+
+3. **Migrations** – The database must have the schema. From your machine with `DATABASE_URL` pointing at Railway’s Postgres:
+   ```bash
+   npx prisma migrate deploy
+   npm run db:seed   # optional: creates default org + admin user
+   ```
+
+4. **Start command** – Should be **`npm start`** (runs `next start`). Railway usually sets **PORT**; Next.js uses it automatically.
+
+5. **Redeploy** – After changing Variables or running migrations, trigger a new deploy (e.g. **Redeploy** in the deployment menu).

@@ -170,7 +170,7 @@ export default function ZonesPage() {
               <button
                 type="button"
                 onClick={cancelForm}
-                className="rounded border border-gray-300 px-3 py-1 text-sm"
+                className="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:bg-gray-50"
               >
                 Cancel
               </button>
