@@ -57,8 +57,8 @@ export default function AppLayout({
   const displayName = user.fullName?.trim() || user.email;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="app-layout min-h-screen flex flex-col bg-gray-50">
+      <header className="app-header border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <Link

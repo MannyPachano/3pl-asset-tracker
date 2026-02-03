@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #ffffff;
+  --border: #e5e7eb;
 }
 
 @theme inline {
@@ -14,6 +16,61 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --surface: #171717;
+    --border: #262626;
+  }
+
+  /* Apply dark theme to app layout and all surfaces */
+  .app-layout {
+    background-color: var(--background);
+  }
+
+  .app-header {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+
+  .app-layout .bg-white,
+  .app-layout .bg-gray-50 {
+    background-color: var(--surface) !important;
+    border-color: var(--border);
+  }
+
+  .app-layout input,
+  .app-layout textarea,
+  .app-layout select {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+
+  .app-layout input::placeholder,
+  .app-layout textarea::placeholder {
+    color: var(--foreground);
+    opacity: 0.6;
+  }
+
+  .app-layout table th,
+  .app-layout table td {
+    border-color: var(--border);
+  }
+
+  .app-layout table thead tr {
+    background-color: var(--surface);
+  }
+
+  .app-layout [class*="border-gray"] {
+    border-color: var(--border);
+  }
+
+  /* Secondary buttons (e.g. Cancel) and link-styled buttons */
+  .app-layout button.bg-white,
+  .app-layout a.bg-white {
+    background-color: var(--surface) !important;
+    color: var(--foreground);
+  }
+
+  .app-layout [class*="text-gray"] {
+    color: var(--foreground);
   }
 }
 
@@ -23,28 +80,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Ensure input/textarea text is readable (dark on light) */
-input,
-textarea,
-select {
-  color: #111827;
-  background-color: #fff;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #9ca3af;
-}
-
-/* Table cells: dark text for readability (override any light inherited color) */
-table th,
-table td {
-  color: #111827 !important;
-}
-
 /* Buttons and links: pointer cursor */
 a,
 button {
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
