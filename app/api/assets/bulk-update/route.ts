@@ -121,11 +121,18 @@ export async function POST(request: Request) {
   }
 
   const updateData: Prisma.AssetUpdateInput = {};
-  if (input.warehouseId !== undefined) updateData.warehouseId = input.warehouseId;
-  if (input.zoneId !== undefined) updateData.zoneId = input.zoneId;
-  else if (input.warehouseId !== undefined) updateData.zoneId = null;
+  if (input.warehouseId !== undefined) {
+    updateData.warehouse = input.warehouseId != null ? { connect: { id: input.warehouseId } } : { disconnect: true };
+  }
+  if (input.zoneId !== undefined) {
+    updateData.zone = input.zoneId != null ? { connect: { id: input.zoneId } } : { disconnect: true };
+  } else if (input.warehouseId !== undefined) {
+    updateData.zone = { disconnect: true };
+  }
   if (input.status !== undefined) updateData.status = input.status;
-  if (input.clientId !== undefined) updateData.clientId = input.clientId;
+  if (input.clientId !== undefined) {
+    updateData.client = input.clientId != null ? { connect: { id: input.clientId } } : { disconnect: true };
+  }
 
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json({ error: "Provide at least one field to update: warehouseId, zoneId, status, clientId." }, { status: 400 });
@@ -145,7 +152,7 @@ export async function POST(request: Request) {
           changedAt: a.updatedAt,
           snapshot: assetSnapshot({
             status: a.status,
-            quantity: a.quantity,
+            quantity: (a as { quantity?: number }).quantity ?? 1,
             warehouseId: a.warehouseId,
             zoneId: a.zoneId,
             clientId: a.clientId,
