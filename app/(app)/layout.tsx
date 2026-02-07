@@ -8,7 +8,7 @@ import { getToken, removeToken, fetchMe, type MeResponse } from "@/lib/auth-clie
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/assets", label: "Assets" },
-  { href: "/locations/warehouses", label: "Warehouses" },
+  { href: "/locations/warehouses", label: "Locations" },
   { href: "/locations/zones", label: "Zones" },
   { href: "/asset-types", label: "Asset types" },
   { href: "/clients", label: "Clients" },

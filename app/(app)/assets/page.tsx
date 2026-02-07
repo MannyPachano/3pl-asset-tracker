@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/auth-client";
 
-type AssetType = { id: number; name: string; code: string | null };
+type AssetType = { id: number; name: string; code: string | null; serialized?: boolean };
 type Client = { id: number; name: string };
 type Warehouse = { id: number; name: string; code: string | null };
 type Zone = { id: number; warehouseId: number; name: string; code: string | null; warehouse?: Warehouse };
 type AssetItem = {
   id: number;
   labelId: string;
+  quantity?: number;
   status: string;
   updatedAt: string;
   assetType: AssetType;
@@ -167,7 +168,7 @@ export default function AssetsListPage() {
           }}
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         >
-          <option value="">All warehouses</option>
+          <option value="">All locations</option>
           {warehouses.map((w) => (
             <option key={w.id} value={w.id}>{w.name}</option>
           ))}
@@ -221,6 +222,7 @@ export default function AssetsListPage() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Label ID</th>
+                <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Qty</th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Type</th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Owner</th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Location</th>
@@ -233,6 +235,9 @@ export default function AssetsListPage() {
               {items.map((a) => (
                 <tr key={a.id}>
                   <td className="border border-gray-200 px-2 py-1 text-sm font-medium">{a.labelId}</td>
+                  <td className="border border-gray-200 px-2 py-1 text-sm tabular-nums">
+                    {(a.quantity ?? 1) > 1 || a.assetType?.serialized === false ? (a.quantity ?? 1) : "—"}
+                  </td>
                   <td className="border border-gray-200 px-2 py-1 text-sm">{a.assetType?.name ?? "—"}</td>
                   <td className="border border-gray-200 px-2 py-1 text-sm">{ownerLabel(a)}</td>
                   <td className="border border-gray-200 px-2 py-1 text-sm">{locationLabel(a)}</td>

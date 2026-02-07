@@ -18,7 +18,7 @@ async function buildLookups(organizationId: number): Promise<ImportLookups> {
   const [assetTypes, clients, warehouses, zones, existingAssets] = await Promise.all([
     prisma.assetType.findMany({
       where: { organizationId },
-      select: { id: true, name: true, code: true },
+      select: { id: true, name: true, code: true, serialized: true },
     }),
     prisma.client.findMany({
       where: { organizationId },
@@ -40,6 +40,7 @@ async function buildLookups(organizationId: number): Promise<ImportLookups> {
 
   const assetTypesByName = new Map<string, number>();
   const assetTypesByCode = new Map<string, number>();
+  const assetTypeSerializedById = new Map<number, boolean>();
   for (const t of assetTypes) {
     const nk = t.name.trim().toLowerCase();
     if (assetTypesByName.has(nk)) assetTypesByName.delete(nk);
@@ -49,6 +50,7 @@ async function buildLookups(organizationId: number): Promise<ImportLookups> {
       if (assetTypesByCode.has(ck)) assetTypesByCode.delete(ck);
       else assetTypesByCode.set(ck, t.id);
     }
+    assetTypeSerializedById.set(t.id, t.serialized);
   }
 
   const clientNames = new Map<string, number>();
@@ -86,7 +88,7 @@ async function buildLookups(organizationId: number): Promise<ImportLookups> {
   const existingLabelIds = new Set(existingAssets.map((a) => a.labelId.trim()));
 
   return {
-    assetTypes: { byName: assetTypesByName, byCode: assetTypesByCode },
+    assetTypes: { byName: assetTypesByName, byCode: assetTypesByCode, serializedById: assetTypeSerializedById },
     clients: clientNames,
     warehouses: { byName: whByName, byCode: whByCode },
     zones: zoneMap,
@@ -181,6 +183,7 @@ export async function POST(request: Request) {
               organizationId: session.organizationId,
               labelId: r.labelId,
               assetTypeId: r.assetTypeId,
+              quantity: r.quantity,
               clientId: r.clientId,
               warehouseId: r.warehouseId,
               zoneId: r.zoneId,

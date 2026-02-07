@@ -7,6 +7,7 @@ const PREVIEW_MAX_ROWS = 200;
 
 export type ReportPreviewItem = {
   labelId: string;
+  quantity: number;
   assetType: string;
   owner: string;
   warehouse: string;
@@ -39,6 +40,7 @@ export async function GET(request: Request) {
 
   const items: ReportPreviewItem[] = assets.map((a) => ({
     labelId: a.labelId,
+    quantity: a.quantity,
     assetType: a.assetType?.name ?? a.assetType?.code ?? "",
     owner: a.client ? a.client.name : "Company",
     warehouse: a.warehouse?.name ?? a.warehouse?.code ?? "",

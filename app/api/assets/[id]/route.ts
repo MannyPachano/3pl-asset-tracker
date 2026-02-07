@@ -18,7 +18,7 @@ async function getAsset(
   const asset = await prisma.asset.findUnique({
     where: { id: numId },
     include: {
-      assetType: { select: { id: true, name: true, code: true } },
+      assetType: { select: { id: true, name: true, code: true, serialized: true } },
       client: { select: { id: true, name: true } },
       warehouse: { select: { id: true, name: true, code: true } },
       zone: { select: { id: true, name: true, code: true } },
@@ -46,6 +46,7 @@ function parseBodyToUpdateInput(body: unknown): AssetCreateInput | null {
   const notes = b.notes === null || b.notes === undefined
     ? (b.notes === null || b.notes === undefined ? null : String(b.notes))
     : String(b.notes);
+  const quantity = b.quantity != null ? Number(b.quantity) : 1;
 
   if (!labelId || !Number.isInteger(assetTypeId)) return null;
   const clientIdResolved = clientId === undefined || Number.isNaN(clientId) ? null : clientId;
@@ -55,6 +56,7 @@ function parseBodyToUpdateInput(body: unknown): AssetCreateInput | null {
   return {
     labelId,
     assetTypeId,
+    quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
     clientId: clientIdResolved,
     warehouseId: warehouseIdResolved,
     zoneId: zoneIdResolved,
@@ -127,6 +129,7 @@ export async function PUT(
         warehouseId: input.warehouseId,
         zoneId: input.zoneId,
         labelId: input.labelId.trim(),
+        quantity: input.quantity,
         status: input.status,
         notes: input.notes?.trim() || null,
       },
@@ -138,9 +141,11 @@ export async function PUT(
         changedAt: a.updatedAt,
         snapshot: assetSnapshot({
           status: a.status,
+          quantity: a.quantity,
           warehouseId: a.warehouseId,
           zoneId: a.zoneId,
           clientId: a.clientId,
+          notes: a.notes,
         }) as Prisma.InputJsonValue,
       },
     });
@@ -150,7 +155,7 @@ export async function PUT(
   const withRelations = await prisma.asset.findUnique({
     where: { id: updated.id },
     include: {
-      assetType: { select: { id: true, name: true, code: true } },
+      assetType: { select: { id: true, name: true, code: true, serialized: true } },
       client: { select: { id: true, name: true } },
       warehouse: { select: { id: true, name: true, code: true } },
       zone: { select: { id: true, name: true, code: true } },

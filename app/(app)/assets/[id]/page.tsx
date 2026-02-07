@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/auth-client";
 
-type AssetType = { id: number; name: string; code: string | null };
+type AssetType = { id: number; name: string; code: string | null; serialized?: boolean };
 type Client = { id: number; name: string };
 type Warehouse = { id: number; name: string; code: string | null };
 type Zone = { id: number; warehouseId: number; name: string; code: string | null };
 type Asset = {
   id: number;
   labelId: string;
+  quantity: number;
   status: string;
   notes: string | null;
   createdAt: string;
@@ -72,6 +73,12 @@ function snapshotSummary(
     parts.push("Owner updated");
   }
 
+  const quantity = snapshot.quantity ?? 1;
+  const prevQuantity = previousSnapshot?.quantity ?? 1;
+  if (quantity !== prevQuantity) {
+    parts.push("Quantity updated");
+  }
+
   const notes = snapshot.notes ?? null;
   const prevNotes = previousSnapshot?.notes ?? null;
   if (notes !== prevNotes) {
@@ -94,6 +101,7 @@ export default function AssetDetailPage() {
 
   const [labelId, setLabelId] = useState("");
   const [assetTypeId, setAssetTypeId] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [owner, setOwner] = useState<"company" | "client">("company");
   const [clientId, setClientId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
@@ -118,6 +126,7 @@ export default function AssetDetailPage() {
         setAsset(a);
         setLabelId(a.labelId);
         setAssetTypeId(String(a.assetType?.id ?? ""));
+        setQuantity(a.quantity ?? 1);
         setOwner(a.client ? "client" : "company");
         setClientId(a.client ? String(a.client.id) : "");
         setWarehouseId(a.warehouse ? String(a.warehouse.id) : "");
@@ -169,6 +178,7 @@ export default function AssetDetailPage() {
     if (asset) {
       setLabelId(asset.labelId);
       setAssetTypeId(String(asset.assetType?.id ?? ""));
+      setQuantity(asset.quantity ?? 1);
       setOwner(asset.client ? "client" : "company");
       setClientId(asset.client ? String(asset.client.id) : "");
       setWarehouseId(asset.warehouse ? String(asset.warehouse.id) : "");
@@ -196,9 +206,12 @@ export default function AssetDetailPage() {
       return;
     }
     setSaveLoading(true);
+    const selectedType = assetTypes.find((t) => t.id === Number(assetTypeId));
+    const isNonSerialized = selectedType && selectedType.serialized === false;
     const body = {
       label_id: labelId.trim(),
       asset_type_id: Number(assetTypeId),
+      quantity: isNonSerialized ? Math.max(1, quantity) : 1,
       client_id: owner === "company" ? null : Number(clientId),
       warehouse_id: warehouseId ? Number(warehouseId) : null,
       zone_id: zoneId ? Number(zoneId) : null,
@@ -297,6 +310,18 @@ export default function AssetDetailPage() {
               ))}
             </select>
           </div>
+          {assetTypes.find((t) => t.id === Number(assetTypeId))?.serialized === false && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Quantity *</label>
+              <input
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="mt-1 w-24 rounded border border-gray-300 px-2 py-1"
+              />
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700">Owner *</label>
             <div className="mt-1 flex gap-4">
@@ -391,6 +416,12 @@ export default function AssetDetailPage() {
             <dt className="text-sm text-gray-500">Type</dt>
             <dd>{asset.assetType?.name ?? "—"}</dd>
           </div>
+          {((asset.quantity ?? 1) > 1 || asset.assetType?.serialized === false) && (
+            <div>
+              <dt className="text-sm text-gray-500">Quantity</dt>
+              <dd>{asset.quantity ?? 1}</dd>
+            </div>
+          )}
           <div>
             <dt className="text-sm text-gray-500">Owner</dt>
             <dd>{asset.client ? asset.client.name : "Company-owned"}</dd>

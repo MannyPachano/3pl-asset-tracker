@@ -45,6 +45,7 @@ model AssetType {
   organizationId Int      @map("organization_id")
   name           String
   code           String?
+  serialized     Boolean  @default(true) // true = track by unit (label ID); false = track by quantity
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -96,6 +97,7 @@ model Asset {
   warehouseId    Int?     @map("warehouse_id")
   zoneId        Int?     @map("zone_id")
   labelId        String   @map("label_id")
+  quantity       Int      @default(1) // 1 for serialized; >= 1 for non-serialized
   status         String   // "in_use" | "idle" | "damaged" | "lost"
   notes          String?
   createdAt      DateTime @default(now()) @map("created_at")

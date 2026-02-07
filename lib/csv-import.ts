@@ -22,10 +22,16 @@ const HEADER_ALIASES: Record<string, string> = {
   zone: "zone",
   zone_name: "zone",
   notes: "notes",
+  quantity: "quantity",
+  qty: "quantity",
 };
 
 export type ImportLookups = {
-  assetTypes: { byName: Map<string, number>; byCode: Map<string, number> };
+  assetTypes: {
+    byName: Map<string, number>;
+    byCode: Map<string, number>;
+    serializedById: Map<number, boolean>;
+  };
   clients: Map<string, number>;
   warehouses: { byName: Map<string, number>; byCode: Map<string, number> };
   zones: Map<string, { warehouseId: number; zoneId: number }>; // key: "warehouseId_zoneName" etc
@@ -35,6 +41,7 @@ export type ImportLookups = {
 export type ImportRow = {
   labelId: string;
   assetTypeId: number;
+  quantity: number;
   clientId: number | null;
   warehouseId: number | null;
   zoneId: number | null;
@@ -138,6 +145,7 @@ function validateRow(
   const warehouseVal = getCell(row, headerIndex, "warehouse");
   const zoneVal = getCell(row, headerIndex, "zone");
   const notesVal = getCell(row, headerIndex, "notes");
+  const quantityVal = getCell(row, headerIndex, "quantity");
 
   if (!labelId) errors.push("label_id is required");
   if (!assetTypeVal) errors.push("asset_type is required");
@@ -161,6 +169,13 @@ function validateRow(
   if (assetTypeId == null) {
     errors.push("asset_type could not be resolved to a single Asset Type in your organization.");
     return { errors };
+  }
+
+  const isSerialized = lookups.assetTypes.serializedById.get(assetTypeId) !== false;
+  let quantity = 1;
+  if (!isSerialized && quantityVal) {
+    const q = parseInt(quantityVal, 10);
+    if (Number.isInteger(q) && q >= 1) quantity = q;
   }
 
   let clientId: number | null = null;
@@ -212,6 +227,7 @@ function validateRow(
     row: {
       labelId: labelTrim,
       assetTypeId,
+      quantity,
       clientId,
       warehouseId,
       zoneId,

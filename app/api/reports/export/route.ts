@@ -42,11 +42,12 @@ export async function GET(request: Request) {
     );
   }
 
-  const headers = ["Label ID", "Asset Type", "Owner", "Warehouse", "Zone", "Status", "Notes", "Last Updated"];
+  const headers = ["Label ID", "Quantity", "Asset Type", "Owner", "Warehouse", "Zone", "Status", "Notes", "Last Updated"];
   const headerLine = headers.map(csvEscape).join(",");
 
   const rows = assets.map((a) => {
     const labelId = a.labelId;
+    const quantity = String(a.quantity);
     const assetType = a.assetType?.name ?? a.assetType?.code ?? "";
     const owner = a.client ? a.client.name : "Company";
     const warehouse = a.warehouse?.name ?? a.warehouse?.code ?? "";
@@ -56,6 +57,7 @@ export async function GET(request: Request) {
     const lastUpdated = formatLastUpdated(a.updatedAt);
     return [
       csvEscape(labelId),
+      csvEscape(quantity),
       csvEscape(assetType),
       csvEscape(owner),
       csvEscape(warehouse),

@@ -77,7 +77,7 @@ export async function GET(request: Request) {
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        assetType: { select: { id: true, name: true, code: true } },
+        assetType: { select: { id: true, name: true, code: true, serialized: true } },
         client: { select: { id: true, name: true } },
         warehouse: { select: { id: true, name: true, code: true } },
         zone: { select: { id: true, name: true, code: true } },
@@ -112,6 +112,7 @@ function parseBodyToCreateInput(body: unknown): AssetCreateInput | null {
   const notes = b.notes === null || b.notes === undefined
     ? (b.notes === null || b.notes === undefined ? null : String(b.notes))
     : String(b.notes);
+  const quantity = b.quantity != null ? Number(b.quantity) : 1;
 
   if (!labelId || !Number.isInteger(assetTypeId)) return null;
   const clientIdResolved = clientId === undefined || Number.isNaN(clientId) ? null : clientId;
@@ -121,6 +122,7 @@ function parseBodyToCreateInput(body: unknown): AssetCreateInput | null {
   return {
     labelId,
     assetTypeId,
+    quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
     clientId: clientIdResolved,
     warehouseId: warehouseIdResolved,
     zoneId: zoneIdResolved,
@@ -160,6 +162,7 @@ export async function POST(request: Request) {
         warehouseId: input.warehouseId,
         zoneId: input.zoneId,
         labelId: input.labelId.trim(),
+        quantity: input.quantity,
         status: input.status,
         notes: input.notes?.trim() || null,
       },
@@ -171,9 +174,11 @@ export async function POST(request: Request) {
         changedAt: created.createdAt,
         snapshot: assetSnapshot({
           status: created.status,
+          quantity: created.quantity,
           warehouseId: created.warehouseId,
           zoneId: created.zoneId,
           clientId: created.clientId,
+          notes: created.notes,
         }) as Prisma.InputJsonValue,
       },
     });

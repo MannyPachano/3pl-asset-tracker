@@ -73,7 +73,7 @@ export default function AssetsImportPage() {
       </div>
       <h1 className="mt-4 text-xl font-semibold text-gray-900">Import assets from CSV</h1>
       <p className="mt-1 text-sm text-gray-600">
-        Upload a CSV with columns: label_id, asset_type, status (required); client, warehouse, zone, notes (optional).
+        Upload a CSV with columns: label_id, asset_type, status (required); client, warehouse, zone, notes, quantity (optional). Use quantity for non-serialized asset types.
         Max 5 MB, 10,000 rows. Duplicate label IDs in the file or in the database will be reported as errors.
       </p>
 

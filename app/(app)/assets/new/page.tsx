@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/auth-client";
 
-type AssetType = { id: number; name: string; code: string | null };
+type AssetType = { id: number; name: string; code: string | null; serialized?: boolean };
 type Client = { id: number; name: string };
 type Warehouse = { id: number; name: string; code: string | null };
 type Zone = { id: number; warehouseId: number; name: string; code: string | null };
@@ -25,6 +25,7 @@ export default function NewAssetPage() {
   const [clientId, setClientId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
   const [zoneId, setZoneId] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState("in_use");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
@@ -57,6 +58,8 @@ export default function NewAssetPage() {
   const zonesForWarehouse = warehouseId
     ? zones.filter((z) => z.warehouseId === Number(warehouseId))
     : [];
+  const selectedAssetType = assetTypes.find((t) => t.id === Number(assetTypeId));
+  const isNonSerialized = selectedAssetType && selectedAssetType.serialized === false;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -81,6 +84,7 @@ export default function NewAssetPage() {
     const body = {
       label_id: labelId.trim(),
       asset_type_id: Number(assetTypeId),
+      quantity: isNonSerialized ? Math.max(1, quantity) : 1,
       client_id: owner === "company" ? null : Number(clientId),
       warehouse_id: warehouseId ? Number(warehouseId) : null,
       zone_id: zoneId ? Number(zoneId) : null,
@@ -136,6 +140,18 @@ export default function NewAssetPage() {
             ))}
           </select>
         </div>
+        {isNonSerialized && (
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Quantity *</label>
+            <input
+              type="number"
+              min={1}
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              className="input w-24"
+            />
+          </div>
+        )}
         <div>
           <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Owner *</label>
           <div className="flex gap-4">

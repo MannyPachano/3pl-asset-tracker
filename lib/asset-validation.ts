@@ -6,6 +6,7 @@ const NOTES_MAX_LENGTH = 2000;
 export type AssetCreateInput = {
   labelId: string;
   assetTypeId: number;
+  quantity: number;
   clientId: number | null;
   warehouseId: number | null;
   zoneId: number | null;
@@ -44,6 +45,14 @@ export async function validateAssetCreate(
   });
   if (!assetType) {
     return { status: 400, error: "Invalid asset type." };
+  }
+
+  const qty = input.quantity;
+  if (!Number.isInteger(qty) || qty < 1) {
+    return { status: 400, error: "Quantity must be at least 1." };
+  }
+  if (assetType.serialized && qty !== 1) {
+    return { status: 400, error: "Serialized asset types must have quantity 1." };
   }
 
   if (input.clientId != null) {
@@ -89,14 +98,18 @@ export async function validateAssetCreate(
 
 export function assetSnapshot(asset: {
   status: string;
+  quantity: number;
   warehouseId: number | null;
   zoneId: number | null;
   clientId: number | null;
+  notes: string | null;
 }): Record<string, unknown> {
   return {
     status: asset.status,
+    quantity: asset.quantity,
     warehouse_id: asset.warehouseId,
     zone_id: asset.zoneId,
     client_id: asset.clientId,
+    notes: asset.notes,
   };
 }

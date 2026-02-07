@@ -10,6 +10,7 @@ type Zone = { id: number; warehouseId: number; name: string; code: string | null
 
 type PreviewItem = {
   labelId: string;
+  quantity: number;
   assetType: string;
   owner: string;
   warehouse: string;
@@ -230,7 +231,7 @@ export default function ReportsPage() {
             }}
             className="input"
           >
-            <option value="">All warehouses</option>
+            <option value="">All locations</option>
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>{w.name}</option>
             ))}
@@ -307,6 +308,7 @@ export default function ReportsPage() {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--background)]">
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Label ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Qty</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Asset type</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Owner</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Warehouse</th>
@@ -320,6 +322,7 @@ export default function ReportsPage() {
                 {previewItems.map((row, i) => (
                   <tr key={`${row.labelId}-${i}`} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--border)]/20">
                     <td className="px-4 py-3 text-sm font-medium text-[var(--foreground)]">{row.labelId}</td>
+                    <td className="px-4 py-3 text-sm tabular-nums text-[var(--foreground)]">{row.quantity}</td>
                     <td className="px-4 py-3 text-sm text-[var(--foreground)]">{row.assetType}</td>
                     <td className="px-4 py-3 text-sm text-[var(--foreground)]">{row.owner}</td>
                     <td className="px-4 py-3 text-sm text-[var(--foreground)]">{row.warehouse || "—"}</td>

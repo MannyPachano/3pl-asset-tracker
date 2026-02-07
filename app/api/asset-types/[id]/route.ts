@@ -44,6 +44,7 @@ export async function PUT(
   const b = body as Record<string, unknown>;
   const name = typeof b.name === "string" ? b.name : "";
   const code = b.code === undefined || b.code === null ? undefined : String(b.code).trim() || undefined;
+  const serialized = b.serialized === undefined || b.serialized === null ? undefined : Boolean(b.serialized);
 
   if (!name.trim()) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -51,7 +52,7 @@ export async function PUT(
 
   const updated = await prisma.assetType.update({
     where: { id: assetType.id },
-    data: { name: name.trim(), code: code },
+    data: { name: name.trim(), code: code, ...(serialized !== undefined ? { serialized } : {}) },
   });
   return NextResponse.json(updated);
 }

@@ -11,6 +11,7 @@ export async function GET(request: Request) {
       id: true,
       name: true,
       code: true,
+      serialized: true,
       createdAt: true,
       updatedAt: true,
       _count: { select: { assets: true } },
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
   const b = body as Record<string, unknown>;
   const name = typeof b.name === "string" ? b.name : "";
   const code = b.code === undefined || b.code === null ? undefined : String(b.code).trim() || undefined;
+  const serialized = b.serialized === undefined || b.serialized === null ? true : Boolean(b.serialized);
 
   if (!name.trim()) {
     return NextResponse.json(
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       organizationId: session.organizationId,
       name: name.trim(),
       code: code,
+      serialized,
     },
   });
   return NextResponse.json(assetType, { status: 201 });

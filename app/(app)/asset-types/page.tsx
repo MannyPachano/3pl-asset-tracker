@@ -7,6 +7,7 @@ type AssetType = {
   id: number;
   name: string;
   code: string | null;
+  serialized?: boolean;
   assetsCount?: number;
 };
 
@@ -18,6 +19,7 @@ export default function AssetTypesPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [serialized, setSerialized] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -38,6 +40,7 @@ export default function AssetTypesPage() {
     setEditingId(null);
     setName("");
     setCode("");
+    setSerialized(true);
     setError("");
     setDeleteError("");
     setFormVisible(true);
@@ -47,6 +50,7 @@ export default function AssetTypesPage() {
     setEditingId(a.id);
     setName(a.name);
     setCode(a.code ?? "");
+    setSerialized(a.serialized !== false);
     setError("");
     setDeleteError("");
     setFormVisible(true);
@@ -62,7 +66,7 @@ export default function AssetTypesPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaveLoading(true);
-    const body = { name: name.trim(), code: code.trim() || undefined };
+    const body = { name: name.trim(), code: code.trim() || undefined, serialized };
     const url = "/api/asset-types" + (editingId ? `/${editingId}` : "");
     const method = editingId ? "PUT" : "POST";
     apiFetch(url, { method, body: JSON.stringify(body) })
@@ -125,6 +129,15 @@ export default function AssetTypesPage() {
                 className="mt-1 rounded border border-gray-300 px-2 py-1"
               />
             </div>
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={serialized}
+                onChange={(e) => setSerialized(e.target.checked)}
+                className="rounded border-gray-300 text-[var(--primary)]"
+              />
+              <span className="text-sm text-gray-700">Serialized (track by unit)</span>
+            </label>
             <div className="flex gap-2">
               <button
                 type="submit"

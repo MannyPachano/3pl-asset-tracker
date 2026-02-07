@@ -28,7 +28,7 @@ export default function WarehousesPage() {
     apiFetch("/api/warehouses")
       .then((r) => r.json())
       .then(setList)
-      .catch(() => setError("Failed to load warehouses"))
+      .catch(() => setError("Failed to load locations"))
       .finally(() => setLoading(false));
   }
 
@@ -84,7 +84,7 @@ export default function WarehousesPage() {
   }
 
   function handleDelete(w: Warehouse) {
-    if (!confirm("Delete this warehouse?")) return;
+    if (!confirm("Delete this location?")) return;
     setDeleteError("");
     apiFetch(`/api/warehouses/${w.id}`, { method: "DELETE" })
       .then((r) => {
@@ -93,7 +93,7 @@ export default function WarehousesPage() {
       })
       .then(() => load())
       .catch((d) =>
-        setDeleteError(d?.error ?? "Cannot delete: this warehouse has zones or assets")
+        setDeleteError(d?.error ?? "Cannot delete: this location has zones or assets")
       );
   }
 
@@ -101,8 +101,8 @@ export default function WarehousesPage() {
     <div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Warehouses</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">Manage warehouse locations</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Locations</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">Manage locations</p>
         </div>
         {!formVisible && (
           <button
@@ -110,7 +110,7 @@ export default function WarehousesPage() {
             onClick={openAdd}
             className="btn-primary mt-2 shrink-0 sm:mt-0"
           >
-            Add warehouse
+            Add location
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ export default function WarehousesPage() {
       {formVisible && (
         <form onSubmit={handleSubmit} className="card mt-6 p-5">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">
-            {editingId ? "Edit warehouse" : "Add warehouse"}
+            {editingId ? "Edit location" : "Add location"}
           </h2>
           <div className="mt-4 flex flex-wrap items-end gap-4">
             <div className="min-w-0 flex-1">
@@ -166,10 +166,10 @@ export default function WarehousesPage() {
         {loading ? (
           <div className="flex items-center justify-center gap-3 py-12 text-[var(--muted)]">
             <div className="spinner" aria-hidden />
-            <span className="text-sm">Loading warehouses…</span>
+            <span className="text-sm">Loading locations…</span>
           </div>
         ) : list.length === 0 ? (
-          <p className="py-12 text-center text-sm text-[var(--muted)]">No warehouses yet. Add one to get started.</p>
+          <p className="py-12 text-center text-sm text-[var(--muted)]">No locations yet. Add one to get started.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
