@@ -11,6 +11,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:upgrade": "prisma migrate deploy && prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts"
   },

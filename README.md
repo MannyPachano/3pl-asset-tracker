@@ -24,7 +24,7 @@ B2B web app for small–mid 3PL companies to track physical logistics assets. Bu
      DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public"
      ```
 
-   - Run migrations: see **[MIGRATIONS.md](./MIGRATIONS.md)** for exact steps (`npx prisma generate`, `npx prisma migrate deploy`).
+   - Run migrations: `npm run db:upgrade` (or see **[MIGRATIONS.md](./MIGRATIONS.md)**). Do this again whenever you pull new code that changes the database.
    - Add `JWT_SECRET` to `.env` (min 32 characters) for auth.
    - Seed an admin user: `npm run db:seed` (login: `admin@example.com` / `admin123`).
 
@@ -45,6 +45,7 @@ B2B web app for small–mid 3PL companies to track physical logistics assets. Bu
 | `npm run db:generate` | Generate Prisma Client         |
 | `npm run db:migrate`  | Apply migrations (interactive)  |
 | `npm run db:migrate:deploy` | Apply migrations (CI/prod) |
+| `npm run db:upgrade`        | Update DB + Prisma after pulling new code |
 | `npm run db:studio`  | Open Prisma Studio               |
 | `npm run db:seed`    | Seed one Organization + Admin user |
 
