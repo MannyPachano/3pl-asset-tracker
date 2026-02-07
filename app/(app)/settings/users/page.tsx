@@ -128,7 +128,7 @@ export default function SettingsUsersPage() {
         <button
           type="button"
           onClick={() => setInviteOpen(true)}
-          className="rounded bg-gray-800 px-3 py-1 text-sm text-white hover:bg-gray-700"
+          className="btn-primary"
         >
           Invite user
         </button>
@@ -299,7 +299,7 @@ export default function SettingsUsersPage() {
                   <button
                     type="submit"
                     disabled={inviteSubmitting}
-                    className="rounded bg-gray-800 px-3 py-1 text-sm text-white hover:bg-gray-700 disabled:opacity-50"
+                    className="btn-primary disabled:opacity-50"
                   >
                     {inviteSubmitting ? "Creating…" : "Create user"}
                   </button>

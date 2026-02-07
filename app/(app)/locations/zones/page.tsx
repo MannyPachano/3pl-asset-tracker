@@ -185,7 +185,7 @@ export default function ZonesPage() {
             type="button"
             onClick={openAdd}
             disabled={warehouses.length === 0}
-            className="rounded bg-gray-800 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             Add zone
           </button>

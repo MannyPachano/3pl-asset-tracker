@@ -154,7 +154,7 @@ export default function ClientsPage() {
           <button
             type="button"
             onClick={openAdd}
-            className="rounded bg-gray-800 px-3 py-1 text-sm text-white"
+            className="btn-primary"
           >
             Add client
           </button>

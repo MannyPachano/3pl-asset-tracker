@@ -226,7 +226,7 @@ export default function AssetDetailPage() {
           <button
             type="button"
             onClick={() => setEditMode(true)}
-            className="rounded bg-gray-700 px-3 py-1 text-sm text-white"
+            className="btn-primary"
           >
             Edit
           </button>

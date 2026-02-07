@@ -188,7 +188,7 @@ export default function AssetsListPage() {
         <button
           type="button"
           onClick={() => { setPage(1); loadList(); }}
-          className="rounded bg-gray-700 px-3 py-1 text-sm text-white"
+          className="btn-primary"
         >
           Apply
         </button>
@@ -197,7 +197,7 @@ export default function AssetsListPage() {
       <div className="mt-4 flex items-center gap-2">
         <Link
           href="/assets/new"
-          className="rounded bg-gray-800 px-3 py-1 text-sm text-white"
+          className="btn-primary"
         >
           Create asset
         </Link>

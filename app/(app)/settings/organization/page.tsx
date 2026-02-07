@@ -59,7 +59,7 @@ export default function OrganizationSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="mt-4 rounded bg-gray-800 px-3 py-1 text-sm text-white hover:bg-gray-700 disabled:opacity-50"
+          className="btn-primary mt-4"
         >
           {saving ? "Saving…" : "Save"}
         </button>
