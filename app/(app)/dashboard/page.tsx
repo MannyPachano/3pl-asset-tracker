@@ -42,8 +42,11 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-sm text-gray-500">Loading…</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Dashboard</h1>
+        <div className="mt-6 flex items-center gap-3 text-[var(--muted)]">
+          <div className="spinner" aria-hidden />
+          <span className="text-sm">Loading…</span>
+        </div>
       </div>
     );
   }
@@ -51,8 +54,8 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Dashboard</h1>
+        <div className="mt-4 alert-error" role="alert">{error}</div>
       </div>
     );
   }
@@ -62,81 +65,84 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Dashboard</h1>
+      <p className="mt-1 text-sm text-[var(--muted)]">Overview of your assets and status</p>
       {accessDenied && (
-        <p className="mt-2 text-sm text-amber-700">
+        <div className="mt-4 alert-warning" role="alert">
           You don&apos;t have access to that page.
-        </p>
+        </div>
       )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded border border-gray-200 bg-white p-4">
-          <h2 className="text-sm font-medium text-gray-500">Total assets</h2>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">{c.total}</p>
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="card p-5">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--muted)]">Total assets</h2>
+          <p className="mt-2 text-3xl font-semibold tabular-nums text-[var(--foreground)]">{c.total}</p>
           <Link
             href="/assets"
-            className="mt-2 block text-sm text-blue-600 hover:underline"
+            className="mt-3 inline-flex items-center text-sm font-medium text-[var(--primary)] transition-colors hover:opacity-90"
           >
             View all →
           </Link>
         </div>
 
-        <div className="rounded border border-gray-200 bg-white p-4 sm:col-span-2">
-          <h2 className="text-sm font-medium text-gray-500">By status</h2>
-          <ul className="mt-2 flex flex-wrap gap-4">
+        <div className="card p-5 sm:col-span-2">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--muted)]">By status</h2>
+          <ul className="mt-3 flex flex-wrap gap-3">
             {(["in_use", "idle", "damaged", "lost"] as const).map((status) => (
               <li key={status}>
                 <Link
                   href={`/assets?status=${status}`}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-[var(--primary)] transition-colors hover:bg-[var(--primary-focus)]"
                 >
-                  {STATUS_LABELS[status]}: {c.byStatus[status] ?? 0}
+                  {STATUS_LABELS[status]}: <span className="ml-1 tabular-nums font-semibold">{c.byStatus[status] ?? 0}</span>
                 </Link>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="rounded border border-gray-200 bg-white p-4">
-          <h2 className="text-sm font-medium text-gray-500">By ownership</h2>
-          <ul className="mt-2 space-y-1">
+        <div className="card p-5">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--muted)]">By ownership</h2>
+          <ul className="mt-3 space-y-2">
             <li>
               <Link
                 href="/assets?clientId=company"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm font-medium text-[var(--primary)] transition-colors hover:opacity-90"
               >
-                Company-owned: {c.byOwner.companyOwned ?? 0}
+                Company-owned: <span className="tabular-nums">{c.byOwner.companyOwned ?? 0}</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/assets?clientId=client_owned"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm font-medium text-[var(--primary)] transition-colors hover:opacity-90"
               >
-                Client-owned: {c.byOwner.clientOwned ?? 0}
+                Client-owned: <span className="tabular-nums">{c.byOwner.clientOwned ?? 0}</span>
               </Link>
             </li>
           </ul>
         </div>
 
         {needsAttention > 0 && (
-          <div className="rounded border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
-            <h2 className="text-sm font-medium text-amber-800">Needs attention</h2>
-            <p className="mt-1 text-sm text-amber-700">
+          <div className="alert-warning sm:col-span-2" role="alert">
+            <h2 className="font-medium">Needs attention</h2>
+            <p className="mt-1 text-sm">
               {c.byStatus.damaged ?? 0} damaged, {c.byStatus.lost ?? 0} lost
             </p>
-            <Link
-              href="/assets?status=damaged"
-              className="mt-2 mr-4 inline-block text-sm text-blue-600 hover:underline"
-            >
-              View damaged →
-            </Link>
-            <Link
-              href="/assets?status=lost"
-              className="mt-2 inline-block text-sm text-blue-600 hover:underline"
-            >
-              View lost →
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Link
+                href="/assets?status=damaged"
+                className="text-sm font-medium text-[var(--primary)] hover:underline"
+              >
+                View damaged →
+              </Link>
+              <Link
+                href="/assets?status=lost"
+                className="text-sm font-medium text-[var(--primary)] hover:underline"
+              >
+                View lost →
+              </Link>
+            </div>
           </div>
         )}
       </div>

@@ -21,6 +21,7 @@ export default function WarehousesPage() {
   const [code, setCode] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   function load() {
     setLoading(true);
@@ -73,6 +74,10 @@ export default function WarehousesPage() {
       .then(() => {
         cancelForm();
         load();
+        setSuccessMessage(editingId ? "Warehouse updated." : "Warehouse added.");
+        setError("");
+        setDeleteError("");
+        setTimeout(() => setSuccessMessage(""), 3000);
       })
       .catch((d) => setError(d?.error ?? "Failed to save"))
       .finally(() => setSaveLoading(false));
@@ -94,55 +99,62 @@ export default function WarehousesPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">Warehouses</h1>
-      {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
-      )}
-      {deleteError && (
-        <p className="mt-2 text-sm text-red-600">{deleteError}</p>
-      )}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Warehouses</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">Manage warehouse locations</p>
+        </div>
+        {!formVisible && (
+          <button
+            type="button"
+            onClick={openAdd}
+            className="btn-primary mt-2 shrink-0 sm:mt-0"
+          >
+            Add warehouse
+          </button>
+        )}
+      </div>
+
+      {error && <div className="mt-4 alert-error" role="alert">{error}</div>}
+      {deleteError && <div className="mt-4 alert-error" role="alert">{deleteError}</div>}
+      {successMessage && <div className="mt-4 alert-success" role="status">{successMessage}</div>}
 
       {formVisible && (
-        <form
-          onSubmit={handleSubmit}
-          className="mt-4 rounded border border-gray-200 bg-white p-4"
-        >
-          <h2 className="text-sm font-medium text-gray-700">
+        <form onSubmit={handleSubmit} className="card mt-6 p-5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">
             {editingId ? "Edit warehouse" : "Add warehouse"}
           </h2>
-          <div className="mt-2 flex flex-wrap items-end gap-4">
-            <div>
-              <label className="block text-sm text-gray-600">Name</label>
+          <div className="mt-4 flex flex-wrap items-end gap-4">
+            <div className="min-w-0 flex-1">
+              <label className="mb-1 block text-sm font-medium text-[var(--muted)]">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full min-w-0 rounded border border-gray-300 px-2 py-1 text-gray-900"
+                className="input"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-600">Code</label>
+            <div className="min-w-0 flex-1">
+              <label className="mb-1 block text-sm font-medium text-[var(--muted)]">Code</label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="mt-1 w-full min-w-0 rounded border border-gray-300 px-2 py-1 text-gray-900"
+                className="input"
               />
             </div>
             <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={saveLoading}
-                className="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-50"
-              >
-                {saveLoading ? "Saving…" : "Save"}
+              <button type="submit" disabled={saveLoading} className="btn-primary">
+                {saveLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="spinner" aria-hidden /> Saving…
+                  </span>
+                ) : (
+                  "Save"
+                )}
               </button>
-              <button
-                type="button"
-                onClick={cancelForm}
-                className="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:bg-gray-50"
-              >
+              <button type="button" onClick={cancelForm} className="btn-secondary">
                 Cancel
               </button>
             </div>
@@ -150,61 +162,56 @@ export default function WarehousesPage() {
         </form>
       )}
 
-      <div className="mt-4">
-        {!formVisible && (
-          <button
-            type="button"
-            onClick={openAdd}
-            className="rounded bg-gray-800 px-3 py-1 text-sm text-white"
-          >
-            Add warehouse
-          </button>
+      <div className="card mt-6 overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center gap-3 py-12 text-[var(--muted)]">
+            <div className="spinner" aria-hidden />
+            <span className="text-sm">Loading warehouses…</span>
+          </div>
+        ) : list.length === 0 ? (
+          <p className="py-12 text-center text-sm text-[var(--muted)]">No warehouses yet. Add one to get started.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-[var(--background)]">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Code</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Zones</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Assets</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((w) => (
+                  <tr key={w.id} className="border-b border-[var(--border)] transition-colors last:border-0 hover:bg-[var(--border)]/20">
+                    <td className="px-4 py-3 text-sm font-medium text-[var(--foreground)]">{w.name}</td>
+                    <td className="px-4 py-3 text-sm text-[var(--muted)]">{w.code ?? "—"}</td>
+                    <td className="px-4 py-3 text-sm tabular-nums text-[var(--foreground)]">{w.zonesCount ?? 0}</td>
+                    <td className="px-4 py-3 text-sm tabular-nums text-[var(--foreground)]">{w.assetsCount ?? 0}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => openEdit(w)}
+                        className="mr-3 text-sm font-medium text-[var(--primary)] hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(w)}
+                        className="text-sm font-medium text-[var(--error)] hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
-
-      {loading ? (
-        <p className="mt-4 text-sm text-gray-500">Loading…</p>
-      ) : list.length === 0 ? (
-        <p className="mt-4 text-sm text-gray-500">No warehouses yet.</p>
-      ) : (
-        <table className="mt-4 w-full border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Name</th>
-              <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Code</th>
-              <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Zones</th>
-              <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Assets</th>
-              <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((w) => (
-              <tr key={w.id}>
-                <td className="border border-gray-200 px-2 py-1 text-sm">{w.name}</td>
-                <td className="border border-gray-200 px-2 py-1 text-sm">{w.code ?? "—"}</td>
-                <td className="border border-gray-200 px-2 py-1 text-sm">{w.zonesCount ?? 0}</td>
-                <td className="border border-gray-200 px-2 py-1 text-sm">{w.assetsCount ?? 0}</td>
-                <td className="border border-gray-200 px-2 py-1">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(w)}
-                    className="mr-2 text-sm text-blue-600 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(w)}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 }

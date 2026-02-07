@@ -103,31 +103,31 @@ export default function NewAssetPage() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-gray-600">
-        <Link href="/assets" className="hover:underline">Assets</Link>
-        <span>/</span>
-        <span>New asset</span>
-      </div>
-      <h1 className="mt-2 text-xl font-semibold text-gray-900">Create asset</h1>
-      {error && <p className="mt-2 text-sm text-red-600" role="alert">{error}</p>}
+      <nav className="flex items-center gap-2 text-sm text-[var(--muted)]" aria-label="Breadcrumb">
+        <Link href="/assets" className="transition-colors hover:text-[var(--foreground)]">Assets</Link>
+        <span aria-hidden>/</span>
+        <span className="text-[var(--foreground)]">New asset</span>
+      </nav>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]">Create asset</h1>
+      {error && <div className="mt-4 alert-error" role="alert">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="mt-4 max-w-xl space-y-4 rounded border border-gray-200 bg-white p-4">
+      <form onSubmit={handleSubmit} className="card mt-6 max-w-xl space-y-5 p-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Label ID *</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Label ID *</label>
           <input
             type="text"
             value={labelId}
             onChange={(e) => setLabelId(e.target.value)}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Asset type *</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Asset type *</label>
           <select
             value={assetTypeId}
             onChange={(e) => setAssetTypeId(e.target.value)}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input"
             required
           >
             <option value="">Select</option>
@@ -137,32 +137,34 @@ export default function NewAssetPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Owner *</label>
-          <div className="mt-1 flex gap-4">
-            <label className="flex items-center gap-1">
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Owner *</label>
+          <div className="flex gap-4">
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
                 name="owner"
                 checked={owner === "company"}
                 onChange={() => setOwner("company")}
+                className="text-[var(--primary)]"
               />
-              Company-owned
+              <span className="text-sm">Company-owned</span>
             </label>
-            <label className="flex items-center gap-1">
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
                 name="owner"
                 checked={owner === "client"}
                 onChange={() => setOwner("client")}
+                className="text-[var(--primary)]"
               />
-              Client-owned
+              <span className="text-sm">Client-owned</span>
             </label>
           </div>
           {owner === "client" && (
             <select
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
-              className="mt-2 w-full rounded border border-gray-300 px-2 py-1"
+              className="input mt-2"
               required
             >
               <option value="">Select client</option>
@@ -173,14 +175,14 @@ export default function NewAssetPage() {
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Warehouse</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Warehouse</label>
           <select
             value={warehouseId}
             onChange={(e) => {
               setWarehouseId(e.target.value);
               setZoneId("");
             }}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input"
           >
             <option value="">None</option>
             {warehouses.map((w) => (
@@ -189,11 +191,11 @@ export default function NewAssetPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Zone</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Zone</label>
           <select
             value={zoneId}
             onChange={(e) => setZoneId(e.target.value)}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input"
             disabled={!warehouseId}
           >
             <option value="">None</option>
@@ -203,11 +205,11 @@ export default function NewAssetPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Status *</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Status *</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input"
             required
           >
             {STATUS_OPTIONS.map((o) => (
@@ -216,28 +218,27 @@ export default function NewAssetPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Notes</label>
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Notes</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1"
+            className="input resize-y"
             maxLength={2000}
           />
         </div>
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-50"
-          >
-            {loading ? "Creating…" : "Create"}
+        <div className="flex gap-3 pt-2">
+          <button type="submit" disabled={loading} className="btn-primary">
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="spinner" aria-hidden /> Creating…
+              </span>
+            ) : (
+              "Create"
+            )}
           </button>
-          <Link
-            href="/assets"
-className="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-800 hover:bg-gray-50"
-            >
-              Cancel
+          <Link href="/assets" className="btn-secondary">
+            Cancel
           </Link>
         </div>
       </form>
