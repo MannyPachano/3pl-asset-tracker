@@ -66,7 +66,7 @@ export default function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Dashboard</h1>
-      <p className="mt-1 text-sm text-[var(--muted)]">Overview of your assets and status</p>
+      <p className="mt-1 text-sm text-[var(--muted)]">See how many assets you have and where they are.</p>
       {accessDenied && (
         <div className="mt-4 alert-warning" role="alert">
           You don&apos;t have access to that page.

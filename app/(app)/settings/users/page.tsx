@@ -119,20 +119,20 @@ export default function SettingsUsersPage() {
 
   return (
     <>
-      <h2 className="text-lg font-medium text-gray-900">Users</h2>
-      <p className="mt-1 text-sm text-gray-600">Manage organization users. Deactivated users cannot sign in.</p>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-
-      <div className="mt-4 flex justify-between">
-        <span />
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Users</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">See who can sign in and invite new people. Turn off a user to block them from signing in.</p>
+        </div>
         <button
           type="button"
           onClick={() => setInviteOpen(true)}
-          className="btn-primary"
+          className="btn-primary mt-2 shrink-0 sm:mt-0"
         >
           Invite user
         </button>
       </div>
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       <table className="mt-4 w-full border-collapse border border-gray-200">
         <thead>

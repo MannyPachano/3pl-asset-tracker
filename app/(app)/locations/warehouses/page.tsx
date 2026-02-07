@@ -102,7 +102,7 @@ export default function WarehousesPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Locations</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">Manage locations</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Add and edit your warehouses. Each location can have zones where you store assets.</p>
         </div>
         {!formVisible && (
           <button

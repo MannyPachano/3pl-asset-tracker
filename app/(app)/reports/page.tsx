@@ -153,10 +153,38 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Reports</h1>
-      <p className="mt-1 text-sm text-[var(--muted)]">
-        Apply filters to preview assets, then export to CSV. Date range filters by last updated.
-      </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Reports</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Pick filters, then click Apply to see a list. Click Export to save the list as a CSV file.
+          </p>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-3 shrink-0 sm:mt-0">
+          <button
+            type="button"
+            onClick={loadPreview}
+            disabled={previewLoading}
+            className="btn-primary disabled:opacity-50"
+          >
+            {previewLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="spinner" aria-hidden /> Loading…
+              </span>
+            ) : (
+              "Apply filters"
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={exporting}
+            className="btn-secondary disabled:opacity-50"
+          >
+            {exporting ? "Exporting…" : "Export CSV"}
+          </button>
+        </div>
+      </div>
       {error && <div className="mt-4 alert-error" role="alert">{error}</div>}
       {previewError && <div className="mt-4 alert-error" role="alert">{previewError}</div>}
 
@@ -253,31 +281,6 @@ export default function ReportsPage() {
               ))}
           </select>
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={loadPreview}
-          disabled={previewLoading}
-          className="btn-primary disabled:opacity-50"
-        >
-          {previewLoading ? (
-            <span className="flex items-center gap-2">
-              <span className="spinner" aria-hidden /> Loading…
-            </span>
-          ) : (
-            "Apply filters"
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={exporting}
-          className="btn-secondary disabled:opacity-50"
-        >
-          {exporting ? "Exporting…" : "Export CSV"}
-        </button>
       </div>
 
       <div className="card mt-8 overflow-hidden">

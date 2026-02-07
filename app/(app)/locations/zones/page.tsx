@@ -110,9 +110,27 @@ export default function ZonesPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">Zones</h1>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Zones</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">Add areas inside each location. Zones help you know exactly where assets are stored.</p>
+        </div>
+        {!formVisible && (
+          <button
+            type="button"
+            onClick={openAdd}
+            disabled={warehouses.length === 0}
+            className="btn-primary mt-2 shrink-0 sm:mt-0 disabled:opacity-50"
+          >
+            Add zone
+          </button>
+        )}
+      </div>
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {deleteError && <p className="mt-4 text-sm text-red-600">{deleteError}</p>}
+      {warehouses.length === 0 && !loading && !formVisible && (
+        <p className="mt-2 text-sm text-[var(--muted)]">Add a location first.</p>
+      )}
 
       {formVisible && (
         <form
@@ -177,22 +195,6 @@ export default function ZonesPage() {
             </div>
           </div>
         </form>
-      )}
-
-      <div className="mt-4">
-        {!formVisible && (
-          <button
-            type="button"
-            onClick={openAdd}
-            disabled={warehouses.length === 0}
-            className="btn-primary disabled:opacity-50"
-          >
-            Add zone
-          </button>
-        )}
-      </div>
-      {warehouses.length === 0 && !loading && (
-        <p className="mt-2 text-sm text-gray-500">Add a warehouse first.</p>
       )}
 
       {loading ? (

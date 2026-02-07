@@ -113,6 +113,7 @@ export default function NewAssetPage() {
         <span className="text-[var(--foreground)]">New asset</span>
       </nav>
       <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--foreground)]">Create asset</h1>
+      <p className="mt-1 text-sm text-[var(--muted)]">Fill in the form to add one new asset. Choose its type, owner, and where it is stored.</p>
       {error && <div className="mt-4 alert-error" role="alert">{error}</div>}
 
       <form onSubmit={handleSubmit} className="card mt-6 max-w-xl space-y-5 p-6">

@@ -192,8 +192,28 @@ export default function AssetsListPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">Assets</h1>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Assets</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">See all your assets, filter by type or location, and add or change them. You can also move or update many at once with bulk update.</p>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2 shrink-0 sm:mt-0">
+          <Link href="/assets/new" className="btn-primary">
+            Create asset
+          </Link>
+          <Link href="/assets/import" className="btn-secondary">
+            Import CSV
+          </Link>
+          {selectedIds.size > 0 && (
+            <>
+              <span className="text-sm text-[var(--muted)]">{selectedIds.size} selected</span>
+              <button type="button" onClick={openBulkModal} className="btn-primary">Bulk update</button>
+              <button type="button" onClick={() => setSelectedIds(new Set())} className="btn-secondary">Clear selection</button>
+            </>
+          )}
+        </div>
+      </div>
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <input
@@ -270,39 +290,6 @@ export default function AssetsListPage() {
         >
           Apply
         </button>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Link href="/assets/new" className="btn-primary">
-          Create asset
-        </Link>
-        <Link
-          href="/assets/import"
-          className="btn-secondary"
-        >
-          Import CSV
-        </Link>
-        {selectedIds.size > 0 && (
-          <>
-            <span className="text-sm text-[var(--muted)]">
-              {selectedIds.size} selected
-            </span>
-            <button
-              type="button"
-              onClick={openBulkModal}
-              className="btn-primary"
-            >
-              Bulk update
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-              className="btn-secondary"
-            >
-              Clear selection
-            </button>
-          </>
-        )}
       </div>
 
       {loading ? (

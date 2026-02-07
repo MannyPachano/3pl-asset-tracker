@@ -97,9 +97,23 @@ export default function AssetTypesPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">Asset types</h1>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">Asset types</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">Define the kinds of things you track, like pallets or boxes. Each type can be serialized (one ID per item) or not.</p>
+        </div>
+        {!formVisible && (
+          <button
+            type="button"
+            onClick={openAdd}
+            className="btn-primary mt-2 shrink-0 sm:mt-0"
+          >
+            Add asset type
+          </button>
+        )}
+      </div>
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {deleteError && <p className="mt-4 text-sm text-red-600">{deleteError}</p>}
 
       {formVisible && (
         <form
@@ -157,18 +171,6 @@ export default function AssetTypesPage() {
           </div>
         </form>
       )}
-
-      <div className="mt-4">
-        {!formVisible && (
-          <button
-            type="button"
-            onClick={openAdd}
-            className="btn-primary"
-          >
-            Add asset type
-          </button>
-        )}
-      </div>
 
       {loading ? (
         <p className="mt-4 text-sm text-gray-500">Loading…</p>
