@@ -38,8 +38,8 @@ export default function AssetsListPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [assetTypeId, setAssetTypeId] = useState("");
-  const [status, setStatus] = useState("");
-  const [clientId, setClientId] = useState("");
+  const [status, setStatus] = useState(() => searchParams.get("status") ?? "");
+  const [clientId, setClientId] = useState(() => searchParams.get("clientId") ?? "");
   const [warehouseId, setWarehouseId] = useState("");
   const [zoneId, setZoneId] = useState("");
 
