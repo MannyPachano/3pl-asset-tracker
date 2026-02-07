@@ -42,13 +42,42 @@ const STATUS_OPTIONS = [
   { value: "lost", label: "Lost" },
 ];
 
-function snapshotSummary(snapshot: Record<string, unknown>): string {
+/**
+ * Describes what changed in this revision by diffing current snapshot with the previous one.
+ * Only includes fields that actually changed; avoids repeating "Owner updated" etc. on every line.
+ */
+function snapshotSummary(
+  snapshot: Record<string, unknown>,
+  previousSnapshot: Record<string, unknown> | null
+): string {
   const parts: string[] = [];
-  if (snapshot.status) parts.push(`Status: ${STATUS_LABELS[String(snapshot.status)] ?? snapshot.status}`);
-  if (snapshot.warehouse_id != null || snapshot.zone_id != null) {
+
+  const status = snapshot.status != null ? String(snapshot.status) : null;
+  const prevStatus = previousSnapshot?.status != null ? String(previousSnapshot.status) : null;
+  if (status !== prevStatus && status) {
+    parts.push(`Status: ${STATUS_LABELS[status] ?? status}`);
+  }
+
+  const wh = snapshot.warehouse_id ?? null;
+  const z = snapshot.zone_id ?? null;
+  const prevWh = previousSnapshot?.warehouse_id ?? null;
+  const prevZ = previousSnapshot?.zone_id ?? null;
+  if (wh !== prevWh || z !== prevZ) {
     parts.push("Location updated");
   }
-  if (snapshot.client_id != null) parts.push("Owner updated");
+
+  const clientId = snapshot.client_id ?? null;
+  const prevClientId = previousSnapshot?.client_id ?? null;
+  if (clientId !== prevClientId) {
+    parts.push("Owner updated");
+  }
+
+  const notes = snapshot.notes ?? null;
+  const prevNotes = previousSnapshot?.notes ?? null;
+  if (notes !== prevNotes) {
+    parts.push("Notes updated");
+  }
+
   return parts.length ? parts.join(" · ") : "Updated";
 }
 
@@ -395,15 +424,18 @@ export default function AssetDetailPage() {
         <div className="mt-6">
           <h2 className="text-sm font-medium text-gray-900">Recent changes</h2>
           <ul className="mt-2 space-y-1 rounded border border-gray-200 bg-white p-4">
-            {history.map((h) => (
-              <li key={h.id} className="flex flex-wrap items-baseline gap-2 text-sm">
-                <span className="text-gray-600">
-                  {new Date(h.changedAt).toLocaleString()}
-                </span>
-                <span className="text-gray-500">by {h.user}</span>
-                <span className="text-gray-700">{snapshotSummary(h.snapshot)}</span>
-              </li>
-            ))}
+            {history.map((h, i) => {
+              const previousSnapshot = history[i + 1]?.snapshot ?? null;
+              return (
+                <li key={h.id} className="flex flex-wrap items-baseline gap-2 text-sm">
+                  <span className="text-gray-600">
+                    {new Date(h.changedAt).toLocaleString()}
+                  </span>
+                  <span className="text-gray-500">by {h.user}</span>
+                  <span className="text-gray-700">{snapshotSummary(h.snapshot, previousSnapshot)}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
