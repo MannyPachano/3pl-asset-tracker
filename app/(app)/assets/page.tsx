@@ -43,6 +43,15 @@ export default function AssetsListPage() {
   const [warehouseId, setWarehouseId] = useState("");
   const [zoneId, setZoneId] = useState("");
 
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkWarehouseId, setBulkWarehouseId] = useState("");
+  const [bulkZoneId, setBulkZoneId] = useState("");
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkClientId, setBulkClientId] = useState("");
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkError, setBulkError] = useState("");
+
   useEffect(() => {
     const s = searchParams.get("status") ?? "";
     const c = searchParams.get("clientId") ?? "";
@@ -112,6 +121,74 @@ export default function AssetsListPage() {
     if (a.warehouse) return a.warehouse.name;
     return "—";
   };
+
+  const allOnPageSelected = items.length > 0 && items.every((a) => selectedIds.has(a.id));
+  function toggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+  function toggleSelectAll() {
+    if (allOnPageSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        items.forEach((a) => next.delete(a.id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        items.forEach((a) => next.add(a.id));
+        return next;
+      });
+    }
+  }
+  function openBulkModal() {
+    setBulkWarehouseId("");
+    setBulkZoneId("");
+    setBulkStatus("");
+    setBulkClientId("");
+    setBulkError("");
+    setBulkModalOpen(true);
+  }
+  function handleBulkUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    setBulkError("");
+    const body: Record<string, unknown> = { assetIds: Array.from(selectedIds) };
+    if (bulkWarehouseId) body.warehouseId = Number(bulkWarehouseId);
+    if (bulkZoneId) body.zoneId = Number(bulkZoneId);
+    if (bulkStatus) body.status = bulkStatus;
+    if (bulkClientId === "company") body.clientId = null;
+    else if (bulkClientId) body.clientId = Number(bulkClientId);
+    if (!body.warehouseId && body.zoneId === undefined && !body.status && body.clientId === undefined) {
+      setBulkError("Select at least one field to update.");
+      return;
+    }
+    if (body.zoneId !== undefined && !body.warehouseId) {
+      setBulkError("Select a warehouse when setting zone.");
+      return;
+    }
+    setBulkSaving(true);
+    apiFetch("/api/assets/bulk-update", { method: "POST", body: JSON.stringify(body) })
+      .then((r) => {
+        if (!r.ok) return r.json().then((d) => Promise.reject(new Error(d?.error ?? "Bulk update failed")));
+        return r.json();
+      })
+      .then((data: { updated: number }) => {
+        setBulkModalOpen(false);
+        setSelectedIds(new Set());
+        loadList();
+      })
+      .catch((err) => setBulkError(err instanceof Error ? err.message : "Bulk update failed"))
+      .finally(() => setBulkSaving(false));
+  }
+
+  const zonesForBulkWarehouse = bulkWarehouseId
+    ? zones.filter((z) => z.warehouseId === Number(bulkWarehouseId))
+    : [];
 
   return (
     <div>
@@ -195,19 +272,37 @@ export default function AssetsListPage() {
         </button>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <Link
-          href="/assets/new"
-          className="btn-primary"
-        >
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Link href="/assets/new" className="btn-primary">
           Create asset
         </Link>
         <Link
           href="/assets/import"
-          className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+          className="btn-secondary"
         >
           Import CSV
         </Link>
+        {selectedIds.size > 0 && (
+          <>
+            <span className="text-sm text-[var(--muted)]">
+              {selectedIds.size} selected
+            </span>
+            <button
+              type="button"
+              onClick={openBulkModal}
+              className="btn-primary"
+            >
+              Bulk update
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="btn-secondary"
+            >
+              Clear selection
+            </button>
+          </>
+        )}
       </div>
 
       {loading ? (
@@ -221,6 +316,15 @@ export default function AssetsListPage() {
           <table className="mt-4 w-full border-collapse border border-gray-200">
             <thead>
               <tr className="bg-gray-100">
+                <th className="w-10 border border-gray-200 px-2 py-1 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allOnPageSelected}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all on page"
+                    className="rounded border-gray-300"
+                  />
+                </th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Label ID</th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Qty</th>
                 <th className="border border-gray-200 px-2 py-1 text-left text-sm font-medium">Type</th>
@@ -234,6 +338,15 @@ export default function AssetsListPage() {
             <tbody>
               {items.map((a) => (
                 <tr key={a.id}>
+                  <td className="w-10 border border-gray-200 px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(a.id)}
+                      onChange={() => toggleSelect(a.id)}
+                      aria-label={`Select ${a.labelId}`}
+                      className="rounded border-gray-300"
+                    />
+                  </td>
                   <td className="border border-gray-200 px-2 py-1 text-sm font-medium">{a.labelId}</td>
                   <td className="border border-gray-200 px-2 py-1 text-sm tabular-nums">
                     {(a.quantity ?? 1) > 1 || a.assetType?.serialized === false ? (a.quantity ?? 1) : "—"}
@@ -278,6 +391,89 @@ export default function AssetsListPage() {
             </div>
           )}
         </>
+      )}
+
+      {bulkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="bulk-update-title">
+          <div className="card max-w-md w-full p-6">
+            <h2 id="bulk-update-title" className="text-lg font-semibold text-[var(--foreground)]">
+              Bulk update {selectedIds.size} assets
+            </h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Set only the fields you want to change. Leave as &quot;No change&quot; to keep current value.
+            </p>
+            <form onSubmit={handleBulkUpdate} className="mt-4 space-y-4">
+              {bulkError && <div className="alert-error" role="alert">{bulkError}</div>}
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Location (warehouse)</label>
+                <select
+                  value={bulkWarehouseId}
+                  onChange={(e) => { setBulkWarehouseId(e.target.value); setBulkZoneId(""); }}
+                  className="input"
+                >
+                  <option value="">No change</option>
+                  {warehouses.map((w) => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Zone</label>
+                <select
+                  value={bulkZoneId}
+                  onChange={(e) => setBulkZoneId(e.target.value)}
+                  className="input"
+                  disabled={!bulkWarehouseId}
+                >
+                  <option value="">No change</option>
+                  {zonesForBulkWarehouse.map((z) => (
+                    <option key={z.id} value={z.id}>{z.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Status</label>
+                <select
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value)}
+                  className="input"
+                >
+                  <option value="">No change</option>
+                  <option value="in_use">In use</option>
+                  <option value="idle">Idle</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground)]">Owner</label>
+                <select
+                  value={bulkClientId}
+                  onChange={(e) => setBulkClientId(e.target.value)}
+                  className="input"
+                >
+                  <option value="">No change</option>
+                  <option value="company">Company-owned</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={bulkSaving} className="btn-primary">
+                  {bulkSaving ? "Updating…" : "Update"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBulkModalOpen(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
