@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { buildReportWhere } from "@/lib/report-filters";
 
 const EXPORT_MAX_ROWS = 50_000;
 
-/** CSV spec: quote field if it contains comma, newline, or double-quote; escape " as "". */
 function csvEscape(value: string): string {
   const s = String(value ?? "");
   if (/[,"\n\r]/.test(s)) {
@@ -13,138 +13,15 @@ function csvEscape(value: string): string {
   return s;
 }
 
-/** Format updated_at as ISO 8601 UTC. */
 function formatLastUpdated(date: Date): string {
   return date.toISOString();
 }
 
 export async function GET(request: Request) {
   const session = await requireAuth(request);
-  const { searchParams } = new URL(request.url);
-
-  const fromDateRaw = searchParams.get("fromDate")?.trim();
-  const toDateRaw = searchParams.get("toDate")?.trim();
-  const assetTypeIdParam = searchParams.get("assetTypeId");
-  const status = searchParams.get("status");
-  const clientIdParam = searchParams.get("clientId");
-  const warehouseIdParam = searchParams.get("warehouseId");
-  const zoneIdParam = searchParams.get("zoneId");
-
-  const orgId = session.organizationId;
-
-  // Validate filter IDs belong to current org
-  if (assetTypeIdParam) {
-    const id = parseInt(assetTypeIdParam, 10);
-    if (!Number.isInteger(id)) {
-      return NextResponse.json({ error: "Invalid filter: asset type." }, { status: 400 });
-    }
-    const exists = await prisma.assetType.findFirst({
-      where: { id, organizationId: orgId },
-    });
-    if (!exists) {
-      return NextResponse.json({ error: "Invalid filter: asset type." }, { status: 400 });
-    }
-  }
-  if (clientIdParam && clientIdParam !== "company" && clientIdParam !== "client_owned") {
-    const id = parseInt(clientIdParam, 10);
-    if (!Number.isInteger(id)) {
-      return NextResponse.json({ error: "Invalid filter: owner." }, { status: 400 });
-    }
-    const exists = await prisma.client.findFirst({
-      where: { id, organizationId: orgId },
-    });
-    if (!exists) {
-      return NextResponse.json({ error: "Invalid filter: owner." }, { status: 400 });
-    }
-  }
-  if (warehouseIdParam) {
-    const id = parseInt(warehouseIdParam, 10);
-    if (!Number.isInteger(id)) {
-      return NextResponse.json({ error: "Invalid filter: warehouse." }, { status: 400 });
-    }
-    const exists = await prisma.warehouse.findFirst({
-      where: { id, organizationId: orgId },
-    });
-    if (!exists) {
-      return NextResponse.json({ error: "Invalid filter: warehouse." }, { status: 400 });
-    }
-  }
-  if (zoneIdParam) {
-    const id = parseInt(zoneIdParam, 10);
-    if (!Number.isInteger(id)) {
-      return NextResponse.json({ error: "Invalid filter: zone." }, { status: 400 });
-    }
-    const zone = await prisma.zone.findFirst({
-      where: { id },
-      include: { warehouse: true },
-    });
-    if (!zone || zone.warehouse.organizationId !== orgId) {
-      return NextResponse.json({ error: "Invalid filter: zone." }, { status: 400 });
-    }
-  }
-
-  type Where = {
-    organizationId: number;
-    updatedAt?: { gte?: Date; lte?: Date };
-    assetTypeId?: number;
-    status?: string;
-    clientId?: number | null | { not: null };
-    warehouseId?: number | null;
-    zoneId?: number | null;
-  };
-
-  const where: Where = { organizationId: orgId };
-
-  if (fromDateRaw || toDateRaw) {
-    let from: Date | undefined;
-    let to: Date | undefined;
-    if (fromDateRaw) {
-      const d = new Date(fromDateRaw + "T00:00:00.000Z");
-      if (Number.isNaN(d.getTime())) {
-        return NextResponse.json({ error: "Invalid filter: from date." }, { status: 400 });
-      }
-      from = d;
-    }
-    if (toDateRaw) {
-      const d = new Date(toDateRaw + "T23:59:59.999Z");
-      if (Number.isNaN(d.getTime())) {
-        return NextResponse.json({ error: "Invalid filter: to date." }, { status: 400 });
-      }
-      to = d;
-    }
-    if (from && to && from > to) {
-      return NextResponse.json({ error: "Invalid filter: from date must be before to date." }, { status: 400 });
-    }
-    where.updatedAt = {};
-    if (from) where.updatedAt.gte = from;
-    if (to) where.updatedAt.lte = to;
-  }
-
-  if (assetTypeIdParam) {
-    const n = parseInt(assetTypeIdParam, 10);
-    if (Number.isInteger(n)) where.assetTypeId = n;
-  }
-  if (status && ["in_use", "idle", "damaged", "lost"].includes(status)) {
-    where.status = status;
-  }
-  if (clientIdParam !== undefined && clientIdParam !== null) {
-    if (clientIdParam === "" || clientIdParam === "company") {
-      where.clientId = null;
-    } else if (clientIdParam === "client_owned") {
-      where.clientId = { not: null };
-    } else {
-      const n = parseInt(clientIdParam, 10);
-      if (Number.isInteger(n)) where.clientId = n;
-    }
-  }
-  if (warehouseIdParam) {
-    const n = parseInt(warehouseIdParam, 10);
-    if (Number.isInteger(n)) where.warehouseId = n;
-  }
-  if (zoneIdParam) {
-    const n = parseInt(zoneIdParam, 10);
-    if (Number.isInteger(n)) where.zoneId = n;
-  }
+  const result = await buildReportWhere(request, prisma, session.organizationId);
+  if ("error" in result) return result.error;
+  const { where } = result;
 
   const assets = await prisma.asset.findMany({
     where,
@@ -190,8 +67,7 @@ export async function GET(request: Request) {
   });
 
   const csv = [headerLine, ...rows].join("\n");
-  const exportDate = new Date();
-  const dateStr = exportDate.toISOString().slice(0, 10); // YYYY-MM-DD
+  const dateStr = new Date().toISOString().slice(0, 10);
   const filename = `assets_export_${dateStr}.csv`;
 
   return new NextResponse(csv, {
